@@ -8,6 +8,11 @@ resource "aws_db_event_subscription" "default" {
   source_ids  = var.db_instance_ids
 
   event_categories = [
+    "failover",
     "failure",
+    "low storage",
+    "maintenance",
+    "notification",
+    "recovery",
   ]
 }
