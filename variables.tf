@@ -27,6 +27,12 @@ variable "disk_queue_depth_threshold" {
   default     = 64
 }
 
+variable "ebs_io_balance_threshold" {
+  description = "The minimum percentage of I/O credits remaining in the burst bucket of your RDS database."
+  type        = "string"
+  default     = 20
+}
+
 variable "freeable_memory_threshold" {
   description = "The minimum amount of available random access memory in Byte."
   type        = "string"

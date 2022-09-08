@@ -4,6 +4,7 @@ locals {
     CPUUtilizationThreshold   = "${min(max(var.cpu_utilization_threshold, 0), 100)}"
     CPUCreditBalanceThreshold = "${max(var.cpu_credit_balance_threshold, 0)}"
     DiskQueueDepthThreshold   = "${max(var.disk_queue_depth_threshold, 0)}"
+    EBSIOBalanceThreshold     = "${max(var.ebs_io_balance_threshold, 100)}"
     FreeableMemoryThreshold   = "${max(var.freeable_memory_threshold, 0)}"
     FreeStorageSpaceThreshold = "${max(var.free_storage_space_threshold, 0)}"
     SwapUsageThreshold        = "${max(var.swap_usage_threshold, 0)}"
@@ -20,6 +21,24 @@ resource "aws_cloudwatch_metric_alarm" "burst_balance_too_low" {
   statistic           = "Average"
   threshold           = "${local.thresholds["BurstBalanceThreshold"]}"
   alarm_description   = "Average database storage burst balance over last 10 minutes too low, expect a significant performance drop soon"
+  alarm_actions       = ["${aws_sns_topic.default.arn}"]
+  ok_actions          = ["${aws_sns_topic.default.arn}"]
+
+  dimensions = {
+    DBInstanceIdentifier = "${var.db_instance_id}"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "ebs_io_balance_too_low" {
+  alarm_name          = "ebs_io_balance_too_low"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "EBSIOBalance%"
+  namespace           = "AWS/RDS"
+  period              = "600"
+  statistic           = "Average"
+  threshold           = "${local.thresholds["EBSIOBalanceThreshold"]}"
+  alarm_description   = "Average database EBS IO balance over last 10 minutes too low, expect a significant performance drop soon"
   alarm_actions       = ["${aws_sns_topic.default.arn}"]
   ok_actions          = ["${aws_sns_topic.default.arn}"]
 
