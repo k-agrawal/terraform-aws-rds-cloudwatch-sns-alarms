@@ -30,20 +30,21 @@ resource "aws_cloudwatch_metric_alarm" "burst_balance_too_low" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "ebs_io_balance_too_low" {
-  alarm_name          = "ebs_io_balance_too_low"
+  count               = length(var.db_instance_ids)
+  alarm_name          = "${var.name_prefix}${var.db_instance_ids[count.index]}-ebs_io_balance_too_low"
   comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "1"
+  evaluation_periods  = var.evaluation_periods
   metric_name         = "EBSIOBalance%"
   namespace           = "AWS/RDS"
-  period              = "600"
+  period              = var.period
   statistic           = "Average"
-  threshold           = "${local.thresholds["EBSIOBalanceThreshold"]}"
-  alarm_description   = "Average database EBS IO balance over last 10 minutes too low, expect a significant performance drop soon"
+  threshold           = local.thresholds["EBSIOBalanceThreshold"]
+  alarm_description   = "Average database EBS IO balance over last ${var.period/60} minutes too low, expect a significant performance drop soon"
   alarm_actions       = [var.aws_sns_topic_arn]
   ok_actions          = [var.aws_sns_topic_arn]
 
   dimensions = {
-    DBInstanceIdentifier = "${var.db_instance_id}"
+    DBInstanceIdentifier = var.db_instance_ids[count.index]
   }
 }
 
