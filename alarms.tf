@@ -39,8 +39,8 @@ resource "aws_cloudwatch_metric_alarm" "ebs_io_balance_too_low" {
   statistic           = "Average"
   threshold           = "${local.thresholds["EBSIOBalanceThreshold"]}"
   alarm_description   = "Average database EBS IO balance over last 10 minutes too low, expect a significant performance drop soon"
-  alarm_actions       = ["${aws_sns_topic.default.arn}"]
-  ok_actions          = ["${aws_sns_topic.default.arn}"]
+  alarm_actions       = [var.aws_sns_topic_arn]
+  ok_actions          = [var.aws_sns_topic_arn]
 
   dimensions = {
     DBInstanceIdentifier = "${var.db_instance_id}"
